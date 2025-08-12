@@ -1,0 +1,449 @@
+{% extends 'layouts/login.html.twig' %}
+
+{% block title %}Entrar - VaiComigo{% endblock %}
+
+{% block content %}
+    <!-- Conteúdo principal -->
+    <div class="container">
+        <div class="container-login">
+            <!-- Logo do sistema -->
+            <div class="container-logo">
+                <img src="/imagens/logo-final.svg" alt="VaiComigo" class="imagem-logo">
+                <p class="texto-muted">IFTO - Campus Colinas do Tocantins</p>
+            </div>
+            
+            {% if erro %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    {{ erro }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endif %}
+            
+            <!-- Formulário de login -->
+            <form id="formulario-login" class="formulario-login" method="POST">
+                <div class="mb-4">
+                    <label class="rotulo-formulario">
+                        <i class="fas fa-id-card text-primary me-2"></i>
+                        Matrícula
+                    </label>
+                    <input 
+                        type="text" 
+                        name="matricula"
+                        class="controle-formulario" 
+                        placeholder="Digite sua matrícula" 
+                        pattern=".*"
+                        value="{{ matricula|default('') }}"
+                        autocomplete="username"
+                        autofocus
+                        tabindex="1"
+                        required
+                    >
+                    <div class="texto-formulario">Ex: 202310000001</div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="rotulo-formulario">
+                        <i class="fas fa-lock text-primary me-2"></i>
+                        Senha
+                    </label>
+                    <div class="grupo-input">
+                        <input 
+                            type="password"
+                            name="password" 
+                            class="controle-formulario" 
+                            placeholder="Digite sua senha"
+                            autocomplete="current-password"
+                            tabindex="2"
+                            required
+                        >
+                        <!-- Botão para mostrar/ocultar senha -->
+                        <button 
+                            class="btn btn-outline-secondary" 
+                            type="button"
+                            onclick="togglePassword(this)"
+                        >
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary" tabindex="3">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        Entrar
+                    </button>
+                </div>
+                
+                <a href="#" class="esqueceu-senha" type="button" onclick="showRecoveryModal()">
+                    Esqueceu sua senha?
+                </a>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de recuperação de senha -->
+    <div class="modal fade" id="recoveryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Recuperar Senha</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="recoveryForm">
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-id-card text-primary me-2"></i>
+                                Matrícula
+                            </label>
+                            <input 
+                                type="text"
+                                name="matricula" 
+                                class="form-control" 
+                                pattern="\d{12}" 
+                                required
+                            >
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-envelope text-primary me-2"></i>
+                                E-mail Institucional
+                            </label>
+                            <input 
+                                type="email"
+                                name="email" 
+                                class="form-control" 
+                                pattern=".*@estudante\.ifto\.edu\.br"
+                                required
+                            >
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="submitRecovery()">
+                        <i class="fas fa-paper-plane me-2"></i>
+                        Enviar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de verificação de código -->
+    <div class="modal fade" id="verificationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-shield-alt text-primary me-2"></i>
+                        Verificar Código
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-envelope-open-text text-primary" style="font-size: 3rem;"></i>
+                        <h6 class="mt-3">Código enviado para seu email</h6>
+                        <p class="text-muted">Digite o código de 6 dígitos que você recebeu</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-key text-primary me-2"></i>
+                            Código de Verificação
+                        </label>
+                        <input 
+                            type="text"
+                            id="verificationCode"
+                            class="form-control text-center"
+                            style="font-size: 1.5rem; letter-spacing: 0.5rem;"
+                            placeholder="000000"
+                            maxlength="6"
+                            pattern="\d{6}"
+                            required
+                        >
+                        <div class="form-text">
+                            <i class="fas fa-clock me-1"></i>
+                            O código expira em 15 minutos
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="submitVerification()">
+                        <i class="fas fa-check me-2"></i>
+                        Verificar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de nova senha -->
+    <div class="modal fade" id="newPasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-lock text-primary me-2"></i>
+                        Nova Senha
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-key text-success" style="font-size: 3rem;"></i>
+                        <h6 class="mt-3">Código verificado com sucesso!</h6>
+                        <p class="text-muted">Agora defina sua nova senha</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-lock text-primary me-2"></i>
+                            Nova Senha
+                        </label>
+                        <input 
+                            type="password"
+                            id="novaSenha"
+                            class="form-control"
+                            placeholder="Digite sua nova senha"
+                            minlength="6"
+                            required
+                        >
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-lock text-primary me-2"></i>
+                            Confirmar Nova Senha
+                        </label>
+                        <input 
+                            type="password"
+                            id="confirmarSenha"
+                            class="form-control"
+                            placeholder="Confirme sua nova senha"
+                            minlength="6"
+                            required
+                        >
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Requisitos da senha:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Mínimo de 6 caracteres</li>
+                            <li>Recomendado: use letras, números e símbolos</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="submitNewPassword()">
+                        <i class="fas fa-save me-2"></i>
+                        Salvar Nova Senha
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        function togglePassword(button) {
+            const input = button.previousElementSibling;
+            const icon = button.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function showRecoveryModal() {
+            new bootstrap.Modal(document.getElementById('recoveryModal')).show();
+        }
+
+        function submitRecovery() {
+            const form = document.getElementById('recoveryForm');
+            const formData = new FormData(form);
+            
+            // Validar campos
+            const matricula = formData.get('matricula');
+            const email = formData.get('email');
+            
+            if (!matricula || !email) {
+                showAlert('Preencha todos os campos', 'danger');
+                return;
+            }
+            
+            // Enviar requisição
+            fetch('/forgot-password', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('recoveryModal')).hide();
+                    
+                    // Mostrar modal de verificação de código
+                    setTimeout(() => {
+                        showVerificationModal();
+                    }, 500);
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                showAlert('Erro ao processar solicitação', 'danger');
+            });
+        }
+
+        function showVerificationModal() {
+            const modal = new bootstrap.Modal(document.getElementById('verificationModal'));
+            modal.show();
+        }
+
+        function submitVerification() {
+            const codigo = document.getElementById('verificationCode').value;
+            
+            if (!codigo) {
+                showAlert('Digite o código de verificação', 'danger');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('codigo', codigo);
+            
+            fetch('/verify-code', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('verificationModal')).hide();
+                    
+                    // Mostrar modal de nova senha
+                    setTimeout(() => {
+                        showNewPasswordModal();
+                    }, 500);
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                showAlert('Erro ao verificar código', 'danger');
+            });
+        }
+
+        function showNewPasswordModal() {
+            const modal = new bootstrap.Modal(document.getElementById('newPasswordModal'));
+            modal.show();
+        }
+
+        function submitNewPassword() {
+            const novaSenha = document.getElementById('novaSenha').value;
+            const confirmarSenha = document.getElementById('confirmarSenha').value;
+            
+            if (!novaSenha || !confirmarSenha) {
+                showAlert('Preencha todos os campos', 'danger');
+                return;
+            }
+            
+            if (novaSenha !== confirmarSenha) {
+                showAlert('Senhas não coincidem', 'danger');
+                return;
+            }
+            
+            if (novaSenha.length < 6) {
+                showAlert('Senha deve ter pelo menos 6 caracteres', 'danger');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('nova_senha', novaSenha);
+            formData.append('confirmar_senha', confirmarSenha);
+            
+            fetch('/reset-password', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('newPasswordModal')).hide();
+                    
+                    // Limpar formulários
+                    document.getElementById('recoveryForm').reset();
+                    document.getElementById('verificationCode').value = '';
+                    document.getElementById('novaSenha').value = '';
+                    document.getElementById('confirmarSenha').value = '';
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                showAlert('Erro ao redefinir senha', 'danger');
+            });
+        }
+
+        function showAlert(message, type) {
+            // Remover alertas existentes
+            const existingAlerts = document.querySelectorAll('.alert-floating');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            // Criar novo alerta
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show alert-floating`;
+            alertDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            // Auto-remover após 5 segundos
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+    </script>
+{% endblock %}

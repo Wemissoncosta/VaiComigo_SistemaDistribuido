@@ -1,0 +1,14 @@
+{
+    "name": "vaicomigo/php-mvc",
+    "description": "Projeto VaiComigo com estrutura MVC",
+    "require": {
+        "twig/twig": "^3.0",
+        "php-amqplib/php-amqplib": "^3.7",
+        "phpmailer/phpmailer": "^6.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/app/"
+        }
+    }
+}

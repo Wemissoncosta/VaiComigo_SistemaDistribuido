@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"       # RabbitMQ AMQP port
+      - "15672:15672"     # RabbitMQ Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - rabbitmq_network
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  producer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: producer
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./src/rabbitmq:/var/www/rabbitmq
+      - ./vendor:/var/www/vendor
+    networks:
+      - rabbitmq_network
+    command: php /var/www/rabbitmq/producer.php
+
+  consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: consumer
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./src/rabbitmq:/var/www/rabbitmq
+      - ./vendor:/var/www/vendor
+    networks:
+      - rabbitmq_network
+    environment:
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USER: dheyfdheyf.silva@estudante.ifto.edu.br
+      SMTP_PASS: dsuf upbc buca emwf
+    command: php /var/www/rabbitmq/consumer.php
+
+networks:
+  rabbitmq_network:
+    name: rabbitmq_network
+    driver: bridge
+
+volumes:
+  rabbitmq_data:

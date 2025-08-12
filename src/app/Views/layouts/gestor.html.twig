@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}VaiComigo{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS Existentes -->
+     <link rel="stylesheet" href="/css/gestor.css">
+    {% block css %}{% endblock %}
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/imagens/favicon.ico">
+    
+    {% block head %}{% endblock %}
+    
+</head>
+<body>
+    {% block content %}{% endblock %}
+
+    <!-- Footer com cor do menu -->
+    <footer class="footer-gestor">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>VaiComigo</h5>
+                    <p class="mb-0">Sistema de Caronas - IFTO Campus Colinas do Tocantins</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p class="mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Painel Administrativo
+                    </p>
+                    <small class="text-muted">
+                        © {{ 'now'|date('Y') }} - Todos os direitos reservados
+                    </small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

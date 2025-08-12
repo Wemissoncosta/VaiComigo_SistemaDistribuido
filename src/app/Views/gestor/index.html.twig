@@ -1,0 +1,492 @@
+{% extends 'layouts/gestor.html.twig' %}
+
+{% block title %}Gestor - VaiComigo{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="/css/gestor.css">
+    <link rel="stylesheet" href="/css/admin.css">
+{% endblock %}
+
+{% block content %}
+
+    <div class="container-fluid mt-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="fas fa-cogs text-primary me-2"></i>
+                Painel Administrativo
+            </h1>
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <div class="d-flex align-items-center text-muted">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" 
+                             style="width: 35px; height: 35px;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-dark">{{ user.nome|default('Administrador') }}</div>
+                            <small class="text-muted">{{ user.tipo_usuario|default('admin')|title }}</small>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <a href="/logout" class="btn btn-danger btn-sm" onclick="return confirm('Deseja realmente sair?')">
+                        <i class="fas fa-sign-out-alt me-1"></i>
+                        SAIR
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estatísticas -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ estatisticas.total_usuarios|default(25) }}</h4>
+                                <p class="mb-0">Total de Usuários</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ estatisticas.caronas_ativas|default(8) }}</h4>
+                                <p class="mb-0">Caronas Ativas</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-car fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ estatisticas.caronas_concluidas|default(42) }}</h4>
+                                <p class="mb-0">Caronas Concluídas</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-check-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ estatisticas.avaliacoes|default(38) }}</h4>
+                                <p class="mb-0">Avaliações</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-star fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tablas de Gerenciamento -->
+        <div class="card">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="adminTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="usuarios-tab" data-bs-toggle="tab" 
+                                data-bs-target="#usuarios" type="button" role="tab">
+                            <i class="fas fa-users me-2"></i>Usuários
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="caronas-tab" data-bs-toggle="tab" 
+                                data-bs-target="#caronas" type="button" role="tab">
+                            <i class="fas fa-car me-2"></i>Caronas
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="relatorios-tab" data-bs-toggle="tab" 
+                                data-bs-target="#relatorios" type="button" role="tab">
+                            <i class="fas fa-chart-bar me-2"></i>Relatórios
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="card-body">
+                <div class="tab-content" id="adminTabsContent">
+                    <!-- Tabela Usuários -->
+                    <div class="tab-pane fade show active" id="usuarios" role="tabpanel">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5>Gerenciar Usuários</h5>
+                            <button class="btn btn-primary" onclick="abrirModalUsuario()">
+                                <i class="fas fa-plus me-2"></i>Novo Usuário
+                            </button>
+                        </div>
+                        
+                        <!-- Filtros -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" placeholder="Buscar usuário..." id="filtro-usuario">
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="filtro-tipo-usuario">
+                                    <option value="">Todos os tipos</option>
+                                    <option value="aluno">Aluno</option>
+                                    <option value="gestor">Gestor</option>
+                                    <option value="admin">Administrador</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="filtro-status-usuario">
+                                    <option value="">Todos os status</option>
+                                    <option value="1">Ativo</option>
+                                    <option value="0">Inativo</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Tabela de Usuários -->
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Email</th>
+                                        <th>Matrícula</th>
+                                        <th>Tipo</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-usuarios">
+                                    {% if usuarios %}
+                                        {% for usuario in usuarios %}
+                                            <tr>
+                                                <td>{{ usuario.nome }}</td>
+                                                <td>{{ usuario.email }}</td>
+                                                <td>{{ usuario.matricula }}</td>
+                                                <td>
+                                                    <span class="badge bg-{{ usuario.tipo_usuario == 'admin' ? 'danger' : 'primary' }}">
+                                                        {{ usuario.tipo_usuario|title }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-{{ usuario.ativo ? 'success' : 'secondary' }}">
+                                                        {{ usuario.ativo ? 'Ativo' : 'Inativo' }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary" onclick="editarUsuario({{ usuario.id }})">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-{{ usuario.ativo ? 'warning' : 'success' }}" 
+                                                            onclick="alterarStatusUsuario({{ usuario.id }}, {{ usuario.ativo ? 0 : 1 }})">
+                                                        <i class="fas fa-{{ usuario.ativo ? 'pause' : 'play' }}"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <!-- Dados de exemplo -->
+                                        <tr>
+                                            <td>João Silva</td>
+                                            <td>joao.silva@ifto.edu.br</td>
+                                            <td>202300000001</td>
+                                            <td><span class="badge bg-danger">Admin</span></td>
+                                            <td><span class="badge bg-success">Ativo</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-warning">
+                                                    <i class="fas fa-pause"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Maria Santos</td>
+                                            <td>maria.santos@estudante.ifto.edu.br</td>
+                                            <td>202310000001</td>
+                                            <td><span class="badge bg-primary">Aluno</span></td>
+                                            <td><span class="badge bg-success">Ativo</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-warning">
+                                                    <i class="fas fa-pause"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Tabela Caronas -->
+                    <div class="tab-pane fade" id="caronas" role="tabpanel">
+                        <h5>Gerenciar Caronas</h5>
+                        <p class="text-muted">Visualize e gerencie todas as caronas do sistema.</p>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Motorista</th>
+                                        <th>Origem</th>
+                                        <th>Destino</th>
+                                        <th>Data/Hora</th>
+                                        <th>Status</th>
+                                        <th>Vagas</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Maria Santos</td>
+                                        <td>IFTO Campus</td>
+                                        <td>Centro</td>
+                                        <td>25/03/2024 18:00</td>
+                                        <td><span class="badge bg-success">Ativa</span></td>
+                                        <td>2/3</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Tabelas Relatórios -->
+                    <div class="tab-pane fade" id="relatorios" role="tabpanel">
+                        <h5>Relatórios do Sistema</h5>
+                        <p class="text-muted">Visualize estatísticas e relatórios detalhados.</p>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6>Caronas por Mês</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="graficoCaronas" width="400" height="200"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6>Usuários Ativos</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="graficoUsuarios" width="400" height="200"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modais -->
+    <!-- Modal de Usuário -->
+    <div class="modal fade" id="modalUsuario" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalUsuarioTitulo">Novo Usuário</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formUsuario">
+                    <div class="modal-body">
+                        <input type="hidden" id="usuario_id" name="usuario_id">
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="usuario_nome" class="form-label">Nome Completo</label>
+                                    <input type="text" class="form-control" id="usuario_nome" name="nome" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="usuario_email" class="form-label">E-mail</label>
+                                    <input type="email" class="form-control" id="usuario_email" name="email" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="usuario_telefone" class="form-label">Telefone</label>
+                                    <input type="tel" class="form-control" id="usuario_telefone" name="telefone">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="usuario_matricula" class="form-label">Matrícula</label>
+                                    <input type="text" class="form-control" id="usuario_matricula" name="matricula">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="usuario_tipo" class="form-label">Tipo de Usuário</label>
+                                    <select class="form-select" id="usuario_tipo" name="tipo_usuario" required>
+                                        <option value="aluno">Aluno</option>
+                                        <option value="gestor">Gestor</option>
+                                        <option value="admin">Administrador</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="usuario_senha" class="form-label">Senha</label>
+                                    <input type="password" class="form-control" id="usuario_senha" name="senha">
+                                    <div class="form-text">Deixe em branco para manter a senha atual</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Carona -->
+    <div class="modal fade" id="modalCarona" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalCaronaTitulo">Nova Carona</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formCarona">
+                    <div class="modal-body">
+                        <input type="hidden" id="carona_id" name="carona_id">
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="carona_motorista" class="form-label">Motorista</label>
+                                    <select class="form-select" id="carona_motorista" name="motorista_id" required>
+                                        <option value="">Selecione o motorista</option>
+                                        {% if usuarios %}
+                                            {% for usuario in usuarios %}
+                                                <option value="{{ usuario.id }}">{{ usuario.nome }}</option>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="carona_vagas" class="form-label">Vagas Disponíveis</label>
+                                    <input type="number" class="form-control" id="carona_vagas" name="vagas_disponiveis" min="1" max="8" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="carona_origem" class="form-label">Origem</label>
+                                    <input type="text" class="form-control" id="carona_origem" name="origem" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="carona_destino" class="form-label">Destino</label>
+                                    <input type="text" class="form-control" id="carona_destino" name="destino" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="carona_data" class="form-label">Data da Viagem</label>
+                                    <input type="date" class="form-control" id="carona_data" name="data_viagem" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="carona_hora" class="form-label">Hora da Viagem</label>
+                                    <input type="time" class="form-control" id="carona_hora" name="hora_viagem" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="carona_preco" class="form-label">Preço (R$)</label>
+                                    <input type="number" class="form-control" id="carona_preco" name="preco" step="0.01" min="0">
+                                    <div class="form-text">Deixe em branco para carona gratuita</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="carona_status" class="form-label">Status</label>
+                                    <select class="form-select" id="carona_status" name="status" required>
+                                        <option value="ativa">Ativa</option>
+                                        <option value="finalizada">Finalizada</option>
+                                        <option value="cancelada">Cancelada</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="carona_observacoes" class="form-label">Observações</label>
+                            <textarea class="form-control" id="carona_observacoes" name="observacoes" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {{ javascript|raw }}
+{% endblock %}
